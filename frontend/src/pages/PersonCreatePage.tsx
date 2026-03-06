@@ -239,8 +239,8 @@ export default function PersonCreatePage() {
                 />
               </div>
             </div>
-            {errors.birthDate && (
-              <p className="mb-2 text-sm text-destructive">{errors.birthDate.message}</p>
+            {errors.birthDate?.root && (
+              <p className="mb-2 text-sm text-destructive">{errors.birthDate.root.message}</p>
             )}
             <Checkbox
               id="birthDate.isApproximate"
