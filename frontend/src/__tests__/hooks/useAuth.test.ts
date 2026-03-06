@@ -4,13 +4,11 @@ import { useAuthStore } from '@/store/authStore'
 
 describe('useAuthStore', () => {
   beforeEach(() => {
-    // Reset store state before each test
     useAuthStore.setState({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isAdmin: false,
+      isLoading: true,
     })
   })
 
@@ -19,7 +17,6 @@ describe('useAuthStore', () => {
 
     expect(result.current.isAuthenticated).toBe(false)
     expect(result.current.user).toBeNull()
-    expect(result.current.accessToken).toBeNull()
   })
 
   it('should set auth state correctly', () => {
@@ -35,12 +32,11 @@ describe('useAuthStore', () => {
     }
 
     act(() => {
-      result.current.setAuth(mockUser, 'access_token', 'refresh_token')
+      result.current.setAuth(mockUser)
     })
 
     expect(result.current.isAuthenticated).toBe(true)
     expect(result.current.user?.email).toBe('test@example.com')
-    expect(result.current.accessToken).toBe('access_token')
     expect(result.current.isAdmin).toBe(false)
   })
 
@@ -57,7 +53,7 @@ describe('useAuthStore', () => {
     }
 
     act(() => {
-      result.current.setAuth(adminUser, 'access_token', 'refresh_token')
+      result.current.setAuth(adminUser)
     })
 
     expect(result.current.isAdmin).toBe(true)
@@ -66,7 +62,6 @@ describe('useAuthStore', () => {
   it('should clear auth state', () => {
     const { result } = renderHook(() => useAuthStore())
 
-    // First set auth
     const mockUser = {
       id: '123',
       email: 'test@example.com',
@@ -77,27 +72,26 @@ describe('useAuthStore', () => {
     }
 
     act(() => {
-      result.current.setAuth(mockUser, 'access_token', 'refresh_token')
+      result.current.setAuth(mockUser)
     })
 
-    // Then clear
     act(() => {
       result.current.clearAuth()
     })
 
     expect(result.current.isAuthenticated).toBe(false)
     expect(result.current.user).toBeNull()
-    expect(result.current.accessToken).toBeNull()
   })
 
-  it('should update tokens', () => {
+  it('should manage loading state', () => {
     const { result } = renderHook(() => useAuthStore())
 
+    expect(result.current.isLoading).toBe(true)
+
     act(() => {
-      result.current.updateTokens('new_access_token', 'new_refresh_token')
+      result.current.setLoading(false)
     })
 
-    expect(result.current.accessToken).toBe('new_access_token')
-    expect(result.current.refreshToken).toBe('new_refresh_token')
+    expect(result.current.isLoading).toBe(false)
   })
 })

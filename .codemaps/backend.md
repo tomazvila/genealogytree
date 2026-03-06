@@ -124,7 +124,7 @@ HTTP Request
      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  JwtAuthenticationFilter                                     │
-│  - Extracts JWT from Authorization header                   │
+│  - Extracts JWT from ACCESS_TOKEN cookie (or Bearer header) │
 │  - Validates token via JwtService                           │
 │  - Sets SecurityContext                                     │
 └─────────────────────────────────────────────────────────────┘
@@ -164,7 +164,7 @@ HTTP Request
 
 | Controller | Base Path | Key Endpoints |
 |------------|-----------|---------------|
-| AuthController | `/api/auth` | POST /login, /register, /refresh, /logout |
+| AuthController | `/api/auth` | POST /login, /register, /refresh, /logout; GET /me |
 | PersonController | `/api/persons` | CRUD, GET /{id}/relatives, POST /merge |
 | TreeController | `/api/trees` | CRUD, GET /{id}/structure, POST /merge |
 | RelationshipController | `/api/relationships` | POST /, DELETE /{id} |

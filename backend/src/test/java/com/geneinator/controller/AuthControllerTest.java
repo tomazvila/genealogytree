@@ -1,15 +1,16 @@
 package com.geneinator.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.geneinator.dto.auth.LoginRequest;
-import com.geneinator.dto.auth.LoginResponse;
-import com.geneinator.dto.auth.RegisterRequest;
-import com.geneinator.dto.auth.RegisterResponse;
+import com.geneinator.dto.auth.*;
+import com.geneinator.entity.User;
 import com.geneinator.exception.GlobalExceptionHandler;
+import com.geneinator.repository.UserRepository;
+import com.geneinator.security.CookieService;
 import com.geneinator.security.JwtAuthenticationFilter;
 import com.geneinator.security.JwtService;
 import com.geneinator.security.UserDetailsServiceImpl;
 import com.geneinator.service.AuthService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,13 +20,17 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,10 +48,11 @@ class AuthControllerTest {
     @MockitoBean
     private AuthService authService;
 
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-    }
+    @MockitoBean
+    private CookieService cookieService;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     @MockitoBean
     private JwtService jwtService;
@@ -57,6 +63,11 @@ class AuthControllerTest {
     @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
 
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+    }
+
     @Nested
     @DisplayName("POST /api/auth/register")
     class Register {
@@ -64,7 +75,6 @@ class AuthControllerTest {
         @Test
         @DisplayName("should return 200 with user id for valid request")
         void shouldReturnSuccessForValidRequest() throws Exception {
-            // Given
             RegisterRequest request = RegisterRequest.builder()
                     .email("test@example.com")
                     .password("password123")
@@ -79,7 +89,6 @@ class AuthControllerTest {
 
             when(authService.register(any(RegisterRequest.class))).thenReturn(response);
 
-            // When/Then
             mockMvc.perform(post("/api/auth/register")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
@@ -90,14 +99,12 @@ class AuthControllerTest {
         @Test
         @DisplayName("should return 400 for invalid email")
         void shouldReturnBadRequestForInvalidEmail() throws Exception {
-            // Given
             RegisterRequest request = RegisterRequest.builder()
                     .email("invalid-email")
                     .password("password123")
                     .displayName("Test User")
                     .build();
 
-            // When/Then
             mockMvc.perform(post("/api/auth/register")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
@@ -107,14 +114,12 @@ class AuthControllerTest {
         @Test
         @DisplayName("should return 400 for password too short")
         void shouldReturnBadRequestForShortPassword() throws Exception {
-            // Given
             RegisterRequest request = RegisterRequest.builder()
                     .email("test@example.com")
                     .password("short")
                     .displayName("Test User")
                     .build();
 
-            // When/Then
             mockMvc.perform(post("/api/auth/register")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
@@ -127,15 +132,14 @@ class AuthControllerTest {
     class Login {
 
         @Test
-        @DisplayName("should return tokens for valid credentials")
-        void shouldReturnTokensForValidCredentials() throws Exception {
-            // Given
+        @DisplayName("should return user info with Set-Cookie headers and no tokens in body")
+        void shouldReturnUserInfoWithCookies() throws Exception {
             LoginRequest request = LoginRequest.builder()
                     .email("user@example.com")
                     .password("password123")
                     .build();
 
-            LoginResponse response = LoginResponse.builder()
+            LoginResponse loginResponse = LoginResponse.builder()
                     .accessToken("access_token")
                     .refreshToken("refresh_token")
                     .tokenType("Bearer")
@@ -146,15 +150,99 @@ class AuthControllerTest {
                     .role("USER")
                     .build();
 
-            when(authService.login(any(LoginRequest.class))).thenReturn(response);
+            when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
+            when(cookieService.createAccessTokenCookie("access_token"))
+                    .thenReturn(ResponseCookie.from("ACCESS_TOKEN", "access_token").path("/api").build());
+            when(cookieService.createRefreshTokenCookie("refresh_token"))
+                    .thenReturn(ResponseCookie.from("REFRESH_TOKEN", "refresh_token").path("/api/auth/refresh").build());
 
-            // When/Then
             mockMvc.perform(post("/api/auth/login")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("access_token"))
-                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(jsonPath("$.userId").exists())
+                .andExpect(jsonPath("$.email").value(request.getEmail()))
+                .andExpect(jsonPath("$.displayName").value("Test User"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.accessToken").doesNotExist())
+                .andExpect(jsonPath("$.refreshToken").doesNotExist());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/refresh")
+    class Refresh {
+
+        @Test
+        @DisplayName("should refresh tokens from cookie and return user info")
+        void shouldRefreshFromCookie() throws Exception {
+            TokenResponse tokenResponse = TokenResponse.builder()
+                    .accessToken("new_access_token")
+                    .refreshToken("new_refresh_token")
+                    .tokenType("Bearer")
+                    .expiresIn(86400000)
+                    .build();
+
+            User user = User.builder()
+                    .email("user@example.com")
+                    .passwordHash("hash")
+                    .displayName("Test User")
+                    .role(User.UserRole.USER)
+                    .status(User.UserStatus.ACTIVE)
+                    .build();
+
+            when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(tokenResponse);
+            when(jwtService.extractUsername("old_refresh_token")).thenReturn("user@example.com");
+            when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+            when(cookieService.createAccessTokenCookie("new_access_token"))
+                    .thenReturn(ResponseCookie.from("ACCESS_TOKEN", "new_access_token").path("/api").build());
+            when(cookieService.createRefreshTokenCookie("new_refresh_token"))
+                    .thenReturn(ResponseCookie.from("REFRESH_TOKEN", "new_refresh_token").path("/api/auth/refresh").build());
+
+            mockMvc.perform(post("/api/auth/refresh")
+                    .cookie(new Cookie("REFRESH_TOKEN", "old_refresh_token")))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(jsonPath("$.email").value("user@example.com"));
+        }
+
+        @Test
+        @DisplayName("should return 401 when no refresh cookie present")
+        void shouldReturn401WhenNoCookie() throws Exception {
+            mockMvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/logout")
+    class Logout {
+
+        @Test
+        @DisplayName("should clear cookies on logout")
+        void shouldClearCookiesOnLogout() throws Exception {
+            when(cookieService.clearAccessTokenCookie())
+                    .thenReturn(ResponseCookie.from("ACCESS_TOKEN", "").maxAge(0).path("/api").build());
+            when(cookieService.clearRefreshTokenCookie())
+                    .thenReturn(ResponseCookie.from("REFRESH_TOKEN", "").maxAge(0).path("/api/auth/refresh").build());
+
+            mockMvc.perform(post("/api/auth/logout")
+                    .cookie(new Cookie("ACCESS_TOKEN", "some_token")))
+                .andExpect(status().isNoContent())
+                .andExpect(header().exists("Set-Cookie"));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/auth/me")
+    class Me {
+
+        @Test
+        @DisplayName("should return 401 when no authenticated user")
+        void shouldReturn401WhenNotAuthenticated() throws Exception {
+            mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized());
         }
     }
 }

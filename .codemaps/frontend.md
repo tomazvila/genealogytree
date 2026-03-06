@@ -78,8 +78,9 @@ Note: An empty `features/` directory exists with subdirectories (admin, auth, pe
 ```
 <BrowserRouter>
   <QueryClientProvider>
-    <ErrorBoundary>
-      <Routes>
+    <AuthProvider>           ─── Calls /api/auth/me on mount, shows spinner
+      <ErrorBoundary>
+        <Routes>
         │
         ├── "/" ─────────────────── <WelcomePage />
         ├── "/login" ────────────── <LoginPage />
@@ -104,7 +105,8 @@ Note: An empty `features/` directory exists with subdirectories (admin, auth, pe
                           ├── "/admin" ──────────────── <AdminPage />
                           └── "*" ───────────────────── <NotFoundPage />
       </Routes>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </AuthProvider>
   </QueryClientProvider>
 </BrowserRouter>
 ```
@@ -125,8 +127,9 @@ Note: An empty `features/` directory exists with subdirectories (admin, auth, pe
           ▼                    ▼                        │
 ┌─────────────────────────────────────────────┐        │
 │              API Client (api/*.ts)           │        │
-│  - Adds Authorization header from authStore │◄───────┘
-│  - Auto-refreshes tokens on 401 responses   │
+│  - Uses credentials: 'include' (cookies)    │◄───────┘
+│  - Adds X-XSRF-TOKEN header for CSRF       │
+│  - Auto-refreshes via cookie on 401         │
 │  - Handles request/response                 │
 └──────────────────────┬──────────────────────┘
                        │
@@ -140,18 +143,18 @@ Note: An empty `features/` directory exists with subdirectories (admin, auth, pe
 ```typescript
 {
   user: User | null,
-  accessToken: string | null,
-  refreshToken: string | null,
   isAuthenticated: boolean,
   isAdmin: boolean,
+  isLoading: boolean,
 
   // Actions
-  setAuth(tokens, user),
+  setAuth(user),
   clearAuth(),
-  updateTokens(access, refresh)
+  setLoading(boolean)
 }
 ```
-Persisted to localStorage - survives page refresh.
+Persisted to localStorage (user metadata only, no tokens).
+Session hydrated via AuthProvider calling GET /api/auth/me on mount.
 
 ### uiStore.ts (Zustand)
 ```typescript

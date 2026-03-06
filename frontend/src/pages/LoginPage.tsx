@@ -43,18 +43,14 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(data)
 
-      setAuth(
-        {
-          id: response.userId,
-          email: response.email,
-          displayName: response.displayName,
-          role: response.role as 'ADMIN' | 'USER',
-          status: 'ACTIVE',
-          createdAt: new Date().toISOString(),
-        },
-        response.accessToken,
-        response.refreshToken
-      )
+      setAuth({
+        id: response.userId,
+        email: response.email,
+        displayName: response.displayName,
+        role: response.role as 'ADMIN' | 'USER',
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
+      })
 
       navigate('/dashboard')
     } catch (err: unknown) {

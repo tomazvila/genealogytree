@@ -57,7 +57,7 @@ User submits login form
         │
         ▼
 Frontend: LoginPage.tsx
-        │ POST /api/auth/login
+        │ POST /api/auth/login (credentials: include)
         ▼
 Backend: AuthController.login()
         │
@@ -68,10 +68,19 @@ AuthServiceImpl.authenticate()
 JwtService.generateToken()
         │
         ▼
-Frontend: authStore.setAuth(tokens)
-        │ stores in localStorage
+Backend: Set HttpOnly cookies (ACCESS_TOKEN, REFRESH_TOKEN)
+        │ Returns UserInfoResponse (no tokens in body)
+        ▼
+Frontend: authStore.setAuth(user)
+        │ stores user metadata in localStorage (no tokens)
         ▼
 User redirected to Dashboard
+
+Page reload:
+  AuthProvider calls GET /api/auth/me (cookie auto-sent)
+        │
+        ▼
+  Re-hydrates user state from server response
 ```
 
 ### Photo Upload Flow

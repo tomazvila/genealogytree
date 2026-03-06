@@ -21,30 +21,29 @@ interface RequestOptions {
 type RequestBody = Record<string, unknown> | object | unknown[] | FormData | null
 
 let isRefreshing = false
-let refreshPromise: Promise<string | null> | null = null
+let refreshPromise: Promise<boolean> | null = null
 
-async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = useAuthStore.getState().refreshToken
-  if (!refreshToken) return null
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
 
+async function refreshAccessToken(): Promise<boolean> {
   try {
     const response = await fetch(`${BASE_URL}/auth/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     })
 
     if (!response.ok) {
       throw new Error('Refresh failed')
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await response.json()
-    useAuthStore.getState().updateTokens(accessToken, newRefreshToken)
-    return accessToken
+    return true
   } catch {
     useAuthStore.getState().clearAuth()
     window.location.href = '/login'
-    return null
+    return false
   }
 }
 
@@ -68,9 +67,12 @@ async function request<T>(
     ...options?.headers,
   }
 
-  const accessToken = useAuthStore.getState().accessToken
-  if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`
+  // Add CSRF token for mutating requests
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken
+    }
   }
 
   const isFormData = body instanceof FormData
@@ -81,6 +83,7 @@ async function request<T>(
   const response = await fetch(url.toString(), {
     method,
     headers,
+    credentials: 'include',
     body: body === undefined
       ? undefined
       : isFormData
@@ -94,15 +97,27 @@ async function request<T>(
       refreshPromise = refreshAccessToken()
     }
 
-    const newAccessToken = await refreshPromise
+    const success = await refreshPromise
     isRefreshing = false
     refreshPromise = null
 
-    if (newAccessToken) {
-      headers['Authorization'] = `Bearer ${newAccessToken}`
+    if (success) {
+      // Retry with new cookies (automatically included)
+      const retryHeaders: Record<string, string> = { ...options?.headers }
+      if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+        const csrfToken = getCsrfToken()
+        if (csrfToken) {
+          retryHeaders['X-XSRF-TOKEN'] = csrfToken
+        }
+      }
+      if (!isFormData && body !== undefined) {
+        retryHeaders['Content-Type'] = 'application/json'
+      }
+
       const retryResponse = await fetch(url.toString(), {
         method,
-        headers,
+        headers: retryHeaders,
+        credentials: 'include',
         body: body === undefined
           ? undefined
           : isFormData

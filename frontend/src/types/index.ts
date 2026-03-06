@@ -21,11 +21,7 @@ export interface RegisterRequest {
   displayName: string
 }
 
-export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  tokenType: string
-  expiresIn: number
+export interface UserInfoResponse {
   userId: string
   email: string
   displayName: string

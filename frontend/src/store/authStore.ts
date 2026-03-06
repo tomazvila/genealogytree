@@ -4,29 +4,25 @@ import type { User } from '@/types'
 
 interface AuthState {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
   isAuthenticated: boolean
   isAdmin: boolean
-  setAuth: (user: User, accessToken: string, refreshToken: string) => void
+  isLoading: boolean
+  setAuth: (user: User) => void
   clearAuth: () => void
-  updateTokens: (accessToken: string, refreshToken: string) => void
+  setLoading: (loading: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isAdmin: false,
+      isLoading: true,
 
-      setAuth: (user, accessToken, refreshToken) =>
+      setAuth: (user) =>
         set({
           user,
-          accessToken,
-          refreshToken,
           isAuthenticated: true,
           isAdmin: user.role === 'ADMIN',
         }),
@@ -34,14 +30,12 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () =>
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
           isAdmin: false,
         }),
 
-      updateTokens: (accessToken, refreshToken) =>
-        set({ accessToken, refreshToken }),
+      setLoading: (loading) =>
+        set({ isLoading: loading }),
     }),
     {
       name: 'auth-storage',

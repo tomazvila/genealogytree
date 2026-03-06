@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
+import { authApi } from '@/api/auth'
 import { Sun, Moon, Monitor } from 'lucide-react'
 
 export default function Header() {
@@ -12,7 +13,12 @@ export default function Header() {
   const { toggleSidebar, language, setLanguage, theme, setTheme } = useUIStore()
   const [themeMenuOpen, setThemeMenuOpen] = useState(false)
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // Clear auth even if server call fails
+    }
     clearAuth()
     navigate('/login')
   }

@@ -18,6 +18,9 @@ app:
     expiration-ms: 86400000  # 24 hours
     refresh-expiration-ms: 604800000  # 7 days
 
+  cookie:
+    secure: false
+
   storage:
     base-path: ${STORAGE_PATH:./data/geneinator}
     originals-dir: originals
@@ -83,6 +86,8 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
 app:
+  cookie:
+    secure: true
   cors:
     allowed-origins: ${CORS_ORIGINS:https://medis.tomazvi.la}
 
