@@ -15,8 +15,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       .then((info) => {
         setAuth({
           id: info.userId,
-          email: info.email,
-          displayName: info.displayName,
+          username: info.username,
           role: info.role as 'ADMIN' | 'USER',
           status: 'ACTIVE',
           createdAt: new Date().toISOString(),

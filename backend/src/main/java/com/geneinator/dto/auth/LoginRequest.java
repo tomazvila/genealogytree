@@ -1,6 +1,5 @@
 package com.geneinator.dto.auth;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +10,8 @@ import lombok.Data;
 @lombok.AllArgsConstructor
 public class LoginRequest {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    private String email;
+    @NotBlank(message = "Username is required")
+    private String username;
 
     @NotBlank(message = "Password is required")
     private String password;

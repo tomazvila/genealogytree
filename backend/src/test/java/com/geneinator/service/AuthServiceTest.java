@@ -59,20 +59,17 @@ class AuthServiceTest {
         void shouldCreateNewUserWithPendingStatus() {
             // Given
             RegisterRequest request = RegisterRequest.builder()
-                    .email("test@example.com")
+                    .username("testuser")
                     .password("password123")
-                    .displayName("Test User")
                     .build();
 
-            when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+            when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
             when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded_password");
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
-                // Simulate ID assignment using reflection or builder
                 return User.builder()
-                        .email(user.getEmail())
+                        .username(user.getUsername())
                         .passwordHash(user.getPasswordHash())
-                        .displayName(user.getDisplayName())
                         .role(user.getRole())
                         .status(user.getStatus())
                         .build();
@@ -83,7 +80,7 @@ class AuthServiceTest {
 
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getEmail()).isEqualTo(request.getEmail());
+            assertThat(response.getUsername()).isEqualTo(request.getUsername());
             assertThat(response.getMessage()).containsIgnoringCase("approval");
 
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -94,21 +91,20 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("should throw exception when email already exists")
-        void shouldThrowExceptionWhenEmailExists() {
+        @DisplayName("should throw exception when username already exists")
+        void shouldThrowExceptionWhenUsernameExists() {
             // Given
             RegisterRequest request = RegisterRequest.builder()
-                    .email("existing@example.com")
+                    .username("existinguser")
                     .password("password123")
-                    .displayName("Test User")
                     .build();
 
-            when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+            when(userRepository.existsByUsername(request.getUsername())).thenReturn(true);
 
             // When/Then
             assertThatThrownBy(() -> authService.register(request))
                     .isInstanceOf(DuplicateResourceException.class)
-                    .hasMessageContaining("email");
+                    .hasMessageContaining("username");
         }
 
         @Test
@@ -116,12 +112,11 @@ class AuthServiceTest {
         void shouldHashPassword() {
             // Given
             RegisterRequest request = RegisterRequest.builder()
-                    .email("test@example.com")
+                    .username("testuser")
                     .password("plaintext123")
-                    .displayName("Test User")
                     .build();
 
-            when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+            when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
             when(passwordEncoder.encode("plaintext123")).thenReturn("hashed_password");
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -144,19 +139,18 @@ class AuthServiceTest {
         void shouldReturnTokensForValidCredentials() {
             // Given
             LoginRequest request = LoginRequest.builder()
-                    .email("user@example.com")
+                    .username("testuser")
                     .password("password123")
                     .build();
 
             User user = User.builder()
-                    .email(request.getEmail())
+                    .username(request.getUsername())
                     .passwordHash("encoded_password")
-                    .displayName("Test User")
                     .role(User.UserRole.USER)
                     .status(User.UserStatus.ACTIVE)
                     .build();
 
-            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(user));
             when(passwordEncoder.matches(request.getPassword(), user.getPasswordHash())).thenReturn(true);
             when(jwtService.generateToken(any(UserDetails.class))).thenReturn("access_token");
             when(jwtService.generateRefreshToken(any(UserDetails.class))).thenReturn("refresh_token");
@@ -169,7 +163,7 @@ class AuthServiceTest {
             assertThat(response.getAccessToken()).isEqualTo("access_token");
             assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
             assertThat(response.getTokenType()).isEqualTo("Bearer");
-            assertThat(response.getEmail()).isEqualTo(request.getEmail());
+            assertThat(response.getUsername()).isEqualTo(request.getUsername());
         }
 
         @Test
@@ -177,17 +171,17 @@ class AuthServiceTest {
         void shouldRejectPendingApprovalUsers() {
             // Given
             LoginRequest request = LoginRequest.builder()
-                    .email("pending@example.com")
+                    .username("pendinguser")
                     .password("password123")
                     .build();
 
             User user = User.builder()
-                    .email(request.getEmail())
+                    .username(request.getUsername())
                     .passwordHash("encoded_password")
                     .status(User.UserStatus.PENDING_APPROVAL)
                     .build();
 
-            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(user));
 
             // When/Then
             assertThatThrownBy(() -> authService.login(request))
@@ -200,17 +194,17 @@ class AuthServiceTest {
         void shouldRejectSuspendedUsers() {
             // Given
             LoginRequest request = LoginRequest.builder()
-                    .email("suspended@example.com")
+                    .username("suspendeduser")
                     .password("password123")
                     .build();
 
             User user = User.builder()
-                    .email(request.getEmail())
+                    .username(request.getUsername())
                     .passwordHash("encoded_password")
                     .status(User.UserStatus.SUSPENDED)
                     .build();
 
-            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(user));
 
             // When/Then
             assertThatThrownBy(() -> authService.login(request))
@@ -223,17 +217,17 @@ class AuthServiceTest {
         void shouldThrowBadCredentialsForWrongPassword() {
             // Given
             LoginRequest request = LoginRequest.builder()
-                    .email("user@example.com")
+                    .username("testuser")
                     .password("wrong_password")
                     .build();
 
             User user = User.builder()
-                    .email(request.getEmail())
+                    .username(request.getUsername())
                     .passwordHash("encoded_password")
                     .status(User.UserStatus.ACTIVE)
                     .build();
 
-            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(user));
             when(passwordEncoder.matches(request.getPassword(), user.getPasswordHash())).thenReturn(false);
 
             // When/Then
@@ -246,11 +240,11 @@ class AuthServiceTest {
         void shouldThrowBadCredentialsForNonExistentUser() {
             // Given
             LoginRequest request = LoginRequest.builder()
-                    .email("nonexistent@example.com")
+                    .username("nonexistent")
                     .password("password123")
                     .build();
 
-            when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+            when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.empty());
 
             // When/Then
             assertThatThrownBy(() -> authService.login(request))

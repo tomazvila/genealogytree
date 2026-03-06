@@ -76,14 +76,13 @@ class AuthControllerTest {
         @DisplayName("should return 200 with user id for valid request")
         void shouldReturnSuccessForValidRequest() throws Exception {
             RegisterRequest request = RegisterRequest.builder()
-                    .email("test@example.com")
+                    .username("testuser")
                     .password("password123")
-                    .displayName("Test User")
                     .build();
 
             RegisterResponse response = RegisterResponse.builder()
                     .userId(UUID.randomUUID())
-                    .email(request.getEmail())
+                    .username(request.getUsername())
                     .message("Registration successful. Awaiting admin approval.")
                     .build();
 
@@ -93,16 +92,15 @@ class AuthControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(request.getEmail()));
+                .andExpect(jsonPath("$.username").value(request.getUsername()));
         }
 
         @Test
-        @DisplayName("should return 400 for invalid email")
-        void shouldReturnBadRequestForInvalidEmail() throws Exception {
+        @DisplayName("should return 400 for missing username")
+        void shouldReturnBadRequestForMissingUsername() throws Exception {
             RegisterRequest request = RegisterRequest.builder()
-                    .email("invalid-email")
+                    .username("")
                     .password("password123")
-                    .displayName("Test User")
                     .build();
 
             mockMvc.perform(post("/api/auth/register")
@@ -115,9 +113,8 @@ class AuthControllerTest {
         @DisplayName("should return 400 for password too short")
         void shouldReturnBadRequestForShortPassword() throws Exception {
             RegisterRequest request = RegisterRequest.builder()
-                    .email("test@example.com")
+                    .username("testuser")
                     .password("short")
-                    .displayName("Test User")
                     .build();
 
             mockMvc.perform(post("/api/auth/register")
@@ -135,7 +132,7 @@ class AuthControllerTest {
         @DisplayName("should return user info with Set-Cookie headers and no tokens in body")
         void shouldReturnUserInfoWithCookies() throws Exception {
             LoginRequest request = LoginRequest.builder()
-                    .email("user@example.com")
+                    .username("testuser")
                     .password("password123")
                     .build();
 
@@ -145,8 +142,7 @@ class AuthControllerTest {
                     .tokenType("Bearer")
                     .expiresIn(86400000)
                     .userId(UUID.randomUUID())
-                    .email(request.getEmail())
-                    .displayName("Test User")
+                    .username(request.getUsername())
                     .role("USER")
                     .build();
 
@@ -162,8 +158,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
                 .andExpect(jsonPath("$.userId").exists())
-                .andExpect(jsonPath("$.email").value(request.getEmail()))
-                .andExpect(jsonPath("$.displayName").value("Test User"))
+                .andExpect(jsonPath("$.username").value(request.getUsername()))
                 .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.accessToken").doesNotExist())
                 .andExpect(jsonPath("$.refreshToken").doesNotExist());
@@ -185,16 +180,15 @@ class AuthControllerTest {
                     .build();
 
             User user = User.builder()
-                    .email("user@example.com")
+                    .username("testuser")
                     .passwordHash("hash")
-                    .displayName("Test User")
                     .role(User.UserRole.USER)
                     .status(User.UserStatus.ACTIVE)
                     .build();
 
             when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(tokenResponse);
-            when(jwtService.extractUsername("old_refresh_token")).thenReturn("user@example.com");
-            when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+            when(jwtService.extractUsername("old_refresh_token")).thenReturn("testuser");
+            when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
             when(cookieService.createAccessTokenCookie("new_access_token"))
                     .thenReturn(ResponseCookie.from("ACCESS_TOKEN", "new_access_token").path("/api").build());
             when(cookieService.createRefreshTokenCookie("new_refresh_token"))
@@ -204,7 +198,7 @@ class AuthControllerTest {
                     .cookie(new Cookie("REFRESH_TOKEN", "old_refresh_token")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
-                .andExpect(jsonPath("$.email").value("user@example.com"));
+                .andExpect(jsonPath("$.username").value("testuser"));
         }
 
         @Test

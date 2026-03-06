@@ -12,7 +12,7 @@ import java.util.UUID;
 public class AuditLogDto {
     private UUID id;
     private UUID userId;
-    private String userEmail;
+    private String userUsername;
     private String action;
     private String entityType;
     private UUID entityId;

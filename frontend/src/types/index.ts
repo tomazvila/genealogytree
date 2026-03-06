@@ -1,8 +1,7 @@
 // User types
 export interface User {
   id: string
-  email: string
-  displayName: string
+  username: string
   role: 'ADMIN' | 'USER'
   status: 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED'
   createdAt: string
@@ -11,20 +10,18 @@ export interface User {
 
 // Auth types
 export interface LoginRequest {
-  email: string
+  username: string
   password: string
 }
 
 export interface RegisterRequest {
-  email: string
+  username: string
   password: string
-  displayName: string
 }
 
 export interface UserInfoResponse {
   userId: string
-  email: string
-  displayName: string
+  username: string
   role: string
 }
 

@@ -7,7 +7,7 @@
   },
   "login": {
     "title": "Prisijungimas",
-    "email": "El. paštas",
+    "username": "Vartotojo vardas",
     "password": "Slaptažodis",
     "submit": "Prisijungti",
     "noAccount": "Neturite paskyros?",
@@ -15,8 +15,7 @@
   },
   "register": {
     "title": "Sukurti paskyrą",
-    "displayName": "Vardas",
-    "email": "El. paštas",
+    "username": "Vartotojo vardas",
     "password": "Slaptažodis",
     "confirmPassword": "Pakartokite slaptažodį",
     "submit": "Registruotis",

@@ -40,7 +40,7 @@ vi.mock('react-i18next', () => ({
 
 // Mock authStore - use an object that tests can mutate
 let mockAuthState = {
-  user: { id: 'user-123', email: 'test@test.com', displayName: 'Test User', role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' } as { id: string; email: string; displayName: string; role: 'USER' | 'ADMIN'; status: 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED'; createdAt: string } | null,
+  user: { id: 'user-123', username: 'testuser', role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' } as { id: string; username: string; role: 'USER' | 'ADMIN'; status: 'ACTIVE' | 'PENDING_APPROVAL' | 'SUSPENDED'; createdAt: string } | null,
   isAdmin: false,
 }
 
@@ -809,13 +809,13 @@ describe('PersonPage', () => {
   describe('edit functionality', () => {
     beforeEach(async () => {
       // Reset to non-admin user by default
-      mockAuthState.user = { id: 'user-123', email: 'test@test.com', displayName: 'Test User', role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'user-123', username: 'testuser',role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
       mockAuthState.isAdmin = false
     })
 
     it('should show Edit button when user is admin', async () => {
       mockAuthState.isAdmin = true
-      mockAuthState.user = { id: 'admin-user', email: 'admin@test.com', displayName: 'Admin', role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'admin-user', username: 'admin',role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
 
       const { personsApi } = await import('@/api/persons')
       const { treesApi } = await import('@/api/trees')
@@ -830,7 +830,7 @@ describe('PersonPage', () => {
     })
 
     it('should show Edit button when user is tree owner', async () => {
-      mockAuthState.user = { id: 'owner-user-id', email: 'owner@test.com', displayName: 'Owner', role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'owner-user-id', username: 'owner',role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
       mockAuthState.isAdmin = false
 
       const { personsApi } = await import('@/api/persons')
@@ -849,7 +849,7 @@ describe('PersonPage', () => {
     })
 
     it('should NOT show Edit button when user is neither admin nor tree owner', async () => {
-      mockAuthState.user = { id: 'random-user', email: 'random@test.com', displayName: 'Random', role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'random-user', username: 'random',role: 'USER' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
       mockAuthState.isAdmin = false
 
       const { personsApi } = await import('@/api/persons')
@@ -870,7 +870,7 @@ describe('PersonPage', () => {
     it('should open edit modal when clicking Edit button', async () => {
       const user = userEvent.setup()
       mockAuthState.isAdmin = true
-      mockAuthState.user = { id: 'admin-user', email: 'admin@test.com', displayName: 'Admin', role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'admin-user', username: 'admin',role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
 
       const { personsApi } = await import('@/api/persons')
       const { treesApi } = await import('@/api/trees')
@@ -892,7 +892,7 @@ describe('PersonPage', () => {
     it('should close edit modal when clicking Cancel', async () => {
       const user = userEvent.setup()
       mockAuthState.isAdmin = true
-      mockAuthState.user = { id: 'admin-user', email: 'admin@test.com', displayName: 'Admin', role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'admin-user', username: 'admin',role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
 
       const { personsApi } = await import('@/api/persons')
       const { treesApi } = await import('@/api/trees')
@@ -921,7 +921,7 @@ describe('PersonPage', () => {
     it('should update person when saving', async () => {
       const user = userEvent.setup()
       mockAuthState.isAdmin = true
-      mockAuthState.user = { id: 'admin-user', email: 'admin@test.com', displayName: 'Admin', role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
+      mockAuthState.user = { id: 'admin-user', username: 'admin',role: 'ADMIN' as const, status: 'ACTIVE' as const, createdAt: '2024-01-01T00:00:00Z' }
 
       const { personsApi } = await import('@/api/persons')
       const { treesApi } = await import('@/api/trees')

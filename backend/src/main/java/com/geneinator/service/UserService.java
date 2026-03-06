@@ -12,7 +12,7 @@ public interface UserService {
 
     UserDto findById(UUID id);
 
-    UserDto findByEmail(String email);
+    UserDto findByUsername(String username);
 
     Page<UserDto> findAll(Pageable pageable);
 

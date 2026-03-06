@@ -12,8 +12,7 @@ import java.util.UUID;
 @lombok.AllArgsConstructor
 public class UserDto {
     private UUID id;
-    private String email;
-    private String displayName;
+    private String username;
     private String role;
     private String status;
     private Instant createdAt;

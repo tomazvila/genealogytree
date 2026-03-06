@@ -35,9 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDto findByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    public UserDto findByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return toDto(user);
     }
 
@@ -61,9 +61,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        if (request.getDisplayName() != null) {
-            user.setDisplayName(request.getDisplayName());
-        }
         if (request.getPassword() != null) {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
@@ -117,8 +114,7 @@ public class UserServiceImpl implements UserService {
     private UserDto toDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
-                .email(user.getEmail())
-                .displayName(user.getDisplayName())
+                .username(user.getUsername())
                 .role(user.getRole().name())
                 .status(user.getStatus().name())
                 .createdAt(user.getCreatedAt())

@@ -8,6 +8,5 @@ import lombok.Data;
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 public class UserUpdateRequest {
-    private String displayName;
     private String password;
 }

@@ -38,8 +38,7 @@ public class AuthController {
 
         UserInfoResponse userInfo = UserInfoResponse.builder()
                 .userId(loginResponse.getUserId())
-                .email(loginResponse.getEmail())
-                .displayName(loginResponse.getDisplayName())
+                .username(loginResponse.getUsername())
                 .role(loginResponse.getRole())
                 .build();
 
@@ -62,14 +61,13 @@ public class AuthController {
 
         TokenResponse tokenResponse = authService.refreshToken(refreshRequest);
 
-        String userEmail = jwtService.extractUsername(refreshToken);
-        User user = userRepository.findByEmail(userEmail).orElse(null);
+        String username = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByUsername(username).orElse(null);
 
         UserInfoResponse userInfo = user != null
                 ? UserInfoResponse.builder()
                     .userId(user.getId())
-                    .email(user.getEmail())
-                    .displayName(user.getDisplayName())
+                    .username(user.getUsername())
                     .role(user.getRole().name())
                     .build()
                 : UserInfoResponse.builder().build();
@@ -100,16 +98,15 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        String email = auth.getName();
-        User user = userRepository.findByEmail(email).orElse(null);
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
 
         UserInfoResponse userInfo = UserInfoResponse.builder()
                 .userId(user.getId())
-                .email(user.getEmail())
-                .displayName(user.getDisplayName())
+                .username(user.getUsername())
                 .role(user.getRole().name())
                 .build();
 

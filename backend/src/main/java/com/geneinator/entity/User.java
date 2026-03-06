@@ -15,13 +15,10 @@ import java.time.Instant;
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String username;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
-
-    @Column(name = "display_name", nullable = false)
-    private String displayName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

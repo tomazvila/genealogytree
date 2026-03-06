@@ -11,9 +11,8 @@ import { authApi } from '@/api/auth'
 import type { ApiError } from '@/types'
 
 const registerSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  username: z.string().min(1, 'Username is required'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  displayName: z.string().min(1, 'Display name is required'),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
@@ -42,7 +41,7 @@ export default function RegisterPage() {
     } catch (err: unknown) {
       const apiError = err as { response?: { data?: ApiError } }
       if (apiError.response?.data?.message?.includes('already exists')) {
-        setError('Email already exists. Please use a different email.')
+        setError('Username already exists. Please use a different username.')
       } else {
         setError(apiError.response?.data?.message || 'Registration failed. Please try again.')
       }
@@ -72,17 +71,17 @@ export default function RegisterPage() {
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">{t('register.email', 'Email')}</Label>
+              <Label htmlFor="username">{t('register.username', 'Username')}</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                {...register('email')}
+                id="username"
+                type="text"
+                autoComplete="username"
+                {...register('username')}
                 className="mt-1"
-                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-invalid={errors.username ? 'true' : 'false'}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
+              {errors.username && (
+                <p className="mt-1 text-sm text-destructive">{errors.username.message}</p>
               )}
             </div>
 
@@ -98,21 +97,6 @@ export default function RegisterPage() {
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="displayName">{t('register.displayName', 'Display Name')}</Label>
-              <Input
-                id="displayName"
-                type="text"
-                autoComplete="name"
-                {...register('displayName')}
-                className="mt-1"
-                aria-invalid={errors.displayName ? 'true' : 'false'}
-              />
-              {errors.displayName && (
-                <p className="mt-1 text-sm text-destructive">{errors.displayName.message}</p>
               )}
             </div>
           </div>

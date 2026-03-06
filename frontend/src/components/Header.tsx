@@ -96,7 +96,7 @@ export default function Header() {
           {language === 'en' ? 'LT' : 'EN'}
         </button>
 
-        <span className="text-muted-foreground">{user?.displayName}</span>
+        <span className="text-muted-foreground">{user?.username}</span>
 
         <button
           onClick={handleLogout}

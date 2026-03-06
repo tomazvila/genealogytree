@@ -24,8 +24,7 @@ describe('useAuthStore', () => {
 
     const mockUser = {
       id: '123',
-      email: 'test@example.com',
-      displayName: 'Test User',
+      username: 'testuser',
       role: 'USER' as const,
       status: 'ACTIVE' as const,
       createdAt: new Date().toISOString(),
@@ -36,7 +35,7 @@ describe('useAuthStore', () => {
     })
 
     expect(result.current.isAuthenticated).toBe(true)
-    expect(result.current.user?.email).toBe('test@example.com')
+    expect(result.current.user?.username).toBe('testuser')
     expect(result.current.isAdmin).toBe(false)
   })
 
@@ -45,8 +44,7 @@ describe('useAuthStore', () => {
 
     const adminUser = {
       id: '123',
-      email: 'admin@example.com',
-      displayName: 'Admin',
+      username: 'admin',
       role: 'ADMIN' as const,
       status: 'ACTIVE' as const,
       createdAt: new Date().toISOString(),
@@ -64,8 +62,7 @@ describe('useAuthStore', () => {
 
     const mockUser = {
       id: '123',
-      email: 'test@example.com',
-      displayName: 'Test User',
+      username: 'testuser',
       role: 'USER' as const,
       status: 'ACTIVE' as const,
       createdAt: new Date().toISOString(),

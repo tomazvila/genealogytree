@@ -35,18 +35,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
-        log.info("Registering new user with email: {}", request.getEmail());
+        log.info("Registering new user with username: {}", request.getUsername());
 
-        // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("User with this email already exists");
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateResourceException("User with this username already exists");
         }
 
-        // Create new user with PENDING_APPROVAL status
         User user = User.builder()
-                .email(request.getEmail())
+                .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .displayName(request.getDisplayName())
                 .role(User.UserRole.USER)
                 .status(User.UserStatus.PENDING_APPROVAL)
                 .failedLoginAttempts(0)
@@ -54,22 +51,21 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Log the registration
         auditService.log(
                 AuditLog.AuditAction.REGISTER,
                 "User",
                 savedUser.getId(),
                 null,
-                Map.of("email", savedUser.getEmail(), "displayName", savedUser.getDisplayName()),
+                Map.of("username", savedUser.getUsername()),
                 savedUser.getId(),
                 null
         );
 
-        log.info("User registered successfully: {}", savedUser.getEmail());
+        log.info("User registered successfully: {}", savedUser.getUsername());
 
         return RegisterResponse.builder()
                 .userId(savedUser.getId())
-                .email(savedUser.getEmail())
+                .username(savedUser.getUsername())
                 .message("Registration successful. Your account is pending approval by an administrator.")
                 .build();
     }
@@ -77,13 +73,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        log.info("Login attempt for email: {}", request.getEmail());
+        log.info("Login attempt for username: {}", request.getUsername());
 
-        // Find user by email
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
-        // Check user status
         if (user.getStatus() == User.UserStatus.PENDING_APPROVAL) {
             throw new AccountLockedException("Account is pending approval by an administrator");
         }
@@ -92,40 +86,35 @@ public class AuthServiceImpl implements AuthService {
             throw new AccountLockedException("Account has been suspended. Please contact an administrator.");
         }
 
-        // Check if account is locked due to failed attempts
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
             throw new AccountLockedException("Account is temporarily locked. Please try again later.");
         }
 
-        // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             handleFailedLogin(user);
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException("Invalid username or password");
         }
 
-        // Reset failed attempts on successful login
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
         user.setLastLogin(Instant.now());
         userRepository.save(user);
 
-        // Generate tokens
         UserDetails userDetails = createUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        // Log successful login
         auditService.log(
                 AuditLog.AuditAction.LOGIN,
                 "User",
                 user.getId(),
                 null,
-                Map.of("email", user.getEmail()),
+                Map.of("username", user.getUsername()),
                 user.getId(),
                 null
         );
 
-        log.info("User logged in successfully: {}", user.getEmail());
+        log.info("User logged in successfully: {}", user.getUsername());
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
@@ -133,8 +122,7 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .expiresIn(jwtService.getJwtExpiration())
                 .userId(user.getId())
-                .email(user.getEmail())
-                .displayName(user.getDisplayName())
+                .username(user.getUsername())
                 .role(user.getRole().name())
                 .build();
     }
@@ -144,20 +132,17 @@ public class AuthServiceImpl implements AuthService {
     public TokenResponse refreshToken(RefreshTokenRequest request) {
         log.info("Token refresh request");
 
-        // Extract username from refresh token
-        String userEmail = jwtService.extractUsername(request.getRefreshToken());
+        String username = jwtService.extractUsername(request.getRefreshToken());
 
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
 
         UserDetails userDetails = createUserDetails(user);
 
-        // Validate refresh token
         if (!jwtService.isTokenValid(request.getRefreshToken(), userDetails)) {
             throw new BadCredentialsException("Invalid or expired refresh token");
         }
 
-        // Generate new tokens
         String newAccessToken = jwtService.generateToken(userDetails);
         String newRefreshToken = jwtService.generateRefreshToken(userDetails);
 
@@ -172,13 +157,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(String token) {
-        // In a stateless JWT setup, we don't actually invalidate tokens
-        // For proper logout, you'd need a token blacklist (Redis) or short token expiry
-        // Here we just log the action
-        String userEmail = jwtService.extractUsername(token.replace("Bearer ", ""));
-        log.info("User logged out: {}", userEmail);
+        String username = jwtService.extractUsername(token.replace("Bearer ", ""));
+        log.info("User logged out: {}", username);
 
-        userRepository.findByEmail(userEmail).ifPresent(user ->
+        userRepository.findByUsername(username).ifPresent(user ->
                 auditService.log(
                         AuditLog.AuditAction.LOGOUT,
                         "User",
@@ -195,10 +177,9 @@ public class AuthServiceImpl implements AuthService {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
 
-        // Lock account after 5 failed attempts for 15 minutes
         if (attempts >= 5) {
             user.setLockedUntil(Instant.now().plusSeconds(15 * 60));
-            log.warn("Account locked due to {} failed login attempts: {}", attempts, user.getEmail());
+            log.warn("Account locked due to {} failed login attempts: {}", attempts, user.getUsername());
         }
 
         userRepository.save(user);
@@ -206,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
 
     private UserDetails createUserDetails(User user) {
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getUsername(),
                 user.getPasswordHash(),
                 user.getStatus() == User.UserStatus.ACTIVE,
                 true,

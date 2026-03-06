@@ -3,8 +3,7 @@ import type { Page } from '@/types'
 
 export interface AdminUser {
   id: string
-  email: string
-  displayName: string
+  username: string
   role: string
   status: 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED'
   createdAt: string
@@ -14,7 +13,7 @@ export interface AdminUser {
 export interface AuditLog {
   id: string
   userId: string
-  userEmail: string
+  userUsername: string
   action: string
   entityType: string
   entityId: string

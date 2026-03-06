@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 public class UserInfoResponse {
     private UUID userId;
-    private String email;
-    private String displayName;
+    private String username;
     private String role;
 }

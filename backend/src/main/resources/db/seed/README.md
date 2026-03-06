@@ -80,9 +80,8 @@ The mock data requires a user for the `created_by` fields. Register one via the 
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "testuser@example.com",
-    "password": "password123",
-    "displayName": "Test User"
+    "username": "testuser",
+    "password": "password123"
   }'
 ```
 
@@ -91,8 +90,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 ```json
 {
   "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "email": "testuser@example.com",
-  "displayName": "Test User"
+  "username": "testuser"
 }
 ```
 
@@ -100,7 +98,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 
 ```bash
 PGPASSWORD=geneinator_dev psql -h localhost -U geneinator -d geneinator -c "
-UPDATE users SET status = 'ACTIVE' WHERE email = 'testuser@example.com';
+UPDATE users SET status = 'ACTIVE' WHERE username = 'testuser';
 "
 ```
 
@@ -202,7 +200,7 @@ npm run dev
 Frontend will be available at: **http://localhost:5173**
 
 Log in with the credentials from Step 3:
-- Email: `testuser@example.com`
+- Username: `testuser`
 - Password: `password123`
 
 ---
@@ -265,9 +263,8 @@ echo "=== Step 3: Registering test user ==="
 USER_RESPONSE=$(curl -s -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "devuser@test.local",
-    "password": "devpassword123",
-    "displayName": "Dev User"
+    "username": "devuser",
+    "password": "devpassword123"
   }')
 
 USER_ID=$(echo $USER_RESPONSE | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
@@ -293,7 +290,7 @@ SELECT
 
 echo "=== Done! ==="
 echo "Backend running on http://localhost:8080"
-echo "Login with: devuser@test.local / devpassword123"
+echo "Login with: devuser / devpassword123"
 
 # Keep backend running
 wait $BACKEND_PID

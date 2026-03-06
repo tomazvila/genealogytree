@@ -224,9 +224,8 @@ function UserRow({
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
           <div className="text-sm font-medium text-foreground">
-            {user.displayName}
+            {user.username}
           </div>
-          <div className="text-sm text-muted-foreground">{user.email}</div>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -381,7 +380,7 @@ function AuditLogRow({ log }: { log: AuditLog }) {
         {new Date(log.timestamp).toLocaleString()}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-        {log.userEmail}
+        {log.userUsername}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className="px-2 py-1 text-xs font-medium bg-secondary text-muted-foreground rounded">

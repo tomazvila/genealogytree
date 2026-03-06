@@ -12,7 +12,7 @@ import { useAuthStore } from '@/store/authStore'
 import type { ApiError } from '@/types'
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -45,8 +45,7 @@ export default function LoginPage() {
 
       setAuth({
         id: response.userId,
-        email: response.email,
-        displayName: response.displayName,
+        username: response.username,
         role: response.role as 'ADMIN' | 'USER',
         status: 'ACTIVE',
         createdAt: new Date().toISOString(),
@@ -56,7 +55,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       const apiError = err as { response?: { data?: ApiError; status?: number } }
       if (apiError.response?.status === 401) {
-        setError('Invalid credentials. Please check your email and password.')
+        setError('Invalid credentials. Please check your username and password.')
       } else if (apiError.response?.status === 403) {
         setError('Your account is pending approval or has been suspended.')
       } else {
@@ -94,17 +93,17 @@ export default function LoginPage() {
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">{t('login.email', 'Email')}</Label>
+              <Label htmlFor="username">{t('login.username', 'Username')}</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                {...register('email')}
+                id="username"
+                type="text"
+                autoComplete="username"
+                {...register('username')}
                 className="mt-1"
-                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-invalid={errors.username ? 'true' : 'false'}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
+              {errors.username && (
+                <p className="mt-1 text-sm text-destructive">{errors.username.message}</p>
               )}
             </div>
 

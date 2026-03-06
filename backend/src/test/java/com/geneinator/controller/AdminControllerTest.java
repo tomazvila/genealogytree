@@ -82,8 +82,7 @@ class AdminControllerTest {
         sampleUserId = UUID.randomUUID();
         sampleUser = UserDto.builder()
                 .id(sampleUserId)
-                .email("user@example.com")
-                .displayName("Test User")
+                .username("testuser")
                 .role("USER")
                 .status("PENDING_APPROVAL")
                 .createdAt(Instant.now())
@@ -107,7 +106,7 @@ class AdminControllerTest {
                     .param("page", "0")
                     .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].email").value("user@example.com"))
+                .andExpect(jsonPath("$.content[0].username").value("testuser"))
                 .andExpect(jsonPath("$.content[0].status").value("PENDING_APPROVAL"));
         }
 
@@ -237,7 +236,7 @@ class AdminControllerTest {
             AuditLogDto log = AuditLogDto.builder()
                     .id(UUID.randomUUID())
                     .userId(sampleUserId)
-                    .userEmail("user@example.com")
+                    .userUsername("testuser")
                     .action("USER_CREATED")
                     .entityType("USER")
                     .entityId(sampleUserId)
@@ -253,7 +252,7 @@ class AdminControllerTest {
                     .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].action").value("USER_CREATED"))
-                .andExpect(jsonPath("$.content[0].userEmail").value("user@example.com"));
+                .andExpect(jsonPath("$.content[0].userUsername").value("testuser"));
         }
 
         @Test
