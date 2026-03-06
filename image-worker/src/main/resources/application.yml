@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: geneinator-image-worker
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/geneinator
+    username: geneinator
+    password: ${DB_PASSWORD:geneinator_dev}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+app:
+  rabbitmq:
+    retry:
+      max-attempts: 3
+      initial-interval: 1000
+      multiplier: 2.0
+      max-interval: 10000
+
+  storage:
+    base-path: ${STORAGE_PATH:../backend/data/geneinator}
+    originals-dir: originals
+    thumbnails-dir: thumbnails
+
+  processing:
+    thumbnail-sizes:
+      small: 150
+      medium: 400
+      large: 800
+    max-concurrent: 3
+    webp-quality: 80
+
+logging:
+  level:
+    com.geneinator.worker: INFO

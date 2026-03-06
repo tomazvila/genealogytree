@@ -1,0 +1,62 @@
+{
+  "welcome": {
+    "title": "Geneinator",
+    "subtitle": "Preserve your family history. Connect generations.",
+    "login": "Sign In",
+    "register": "Register"
+  },
+  "login": {
+    "title": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign In",
+    "noAccount": "Don't have an account?",
+    "register": "Register"
+  },
+  "register": {
+    "title": "Create Account",
+    "displayName": "Display Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "submit": "Register",
+    "hasAccount": "Already have an account?",
+    "login": "Sign In"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "tree": {
+    "title": "Family Tree",
+    "placeholder": "Tree visualization will be rendered here"
+  },
+  "person": {
+    "title": "Person Details"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "users": "Users",
+    "settings": "Settings",
+    "auditLogs": "Audit Logs"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "tree": "Family Tree",
+    "admin": "Admin",
+    "logout": "Logout"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist.",
+    "goHome": "Go Home"
+  },
+  "common": {
+    "notImplemented": "Not implemented yet - TDD",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}

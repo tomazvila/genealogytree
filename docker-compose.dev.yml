@@ -1,0 +1,29 @@
+# Development override - only run infrastructure services
+# Use with: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # Don't build/run application services in dev mode
+  backend:
+    profiles:
+      - donotstart
+
+  image-worker:
+    profiles:
+      - donotstart
+
+  frontend:
+    profiles:
+      - donotstart
+
+  nginx:
+    profiles:
+      - donotstart

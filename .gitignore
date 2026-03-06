@@ -1,0 +1,45 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Build outputs
+build/
+dist/
+target/
+out/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Nix
+result
+.direnv/
+
+# Data
+data/
+
+# Private files
+private/

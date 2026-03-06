@@ -1,0 +1,62 @@
+{
+  "welcome": {
+    "title": "Geneinator",
+    "subtitle": "Išsaugokite šeimos istoriją. Sujunkite kartas.",
+    "login": "Prisijungti",
+    "register": "Registruotis"
+  },
+  "login": {
+    "title": "Prisijungimas",
+    "email": "El. paštas",
+    "password": "Slaptažodis",
+    "submit": "Prisijungti",
+    "noAccount": "Neturite paskyros?",
+    "register": "Registruotis"
+  },
+  "register": {
+    "title": "Sukurti paskyrą",
+    "displayName": "Vardas",
+    "email": "El. paštas",
+    "password": "Slaptažodis",
+    "confirmPassword": "Pakartokite slaptažodį",
+    "submit": "Registruotis",
+    "hasAccount": "Jau turite paskyrą?",
+    "login": "Prisijungti"
+  },
+  "dashboard": {
+    "title": "Pradžia"
+  },
+  "tree": {
+    "title": "Šeimos medis",
+    "placeholder": "Medžio vizualizacija bus rodoma čia"
+  },
+  "person": {
+    "title": "Asmens informacija"
+  },
+  "admin": {
+    "title": "Administravimas",
+    "users": "Vartotojai",
+    "settings": "Nustatymai",
+    "auditLogs": "Audito žurnalas"
+  },
+  "nav": {
+    "dashboard": "Pradžia",
+    "tree": "Šeimos medis",
+    "admin": "Administravimas",
+    "logout": "Atsijungti"
+  },
+  "notFound": {
+    "title": "Puslapis nerastas",
+    "message": "Puslapis, kurio ieškote, neegzistuoja.",
+    "goHome": "Grįžti į pradžią"
+  },
+  "common": {
+    "notImplemented": "Dar neįgyvendinta - TDD",
+    "save": "Išsaugoti",
+    "cancel": "Atšaukti",
+    "delete": "Ištrinti",
+    "edit": "Redaguoti",
+    "loading": "Kraunama...",
+    "error": "Įvyko klaida"
+  }
+}

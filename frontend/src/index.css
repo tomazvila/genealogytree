@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Tokyo Night Light */
+  :root {
+    --background: 220 14% 96%;
+    --foreground: 231 30% 28%;
+    --card: 220 14% 100%;
+    --card-foreground: 231 30% 28%;
+    --popover: 220 14% 100%;
+    --popover-foreground: 231 30% 28%;
+    --primary: 218 89% 72%;
+    --primary-foreground: 231 30% 15%;
+    --secondary: 220 14% 90%;
+    --secondary-foreground: 231 30% 28%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 226 22% 44%;
+    --accent: 267 84% 79%;
+    --accent-foreground: 231 30% 15%;
+    --destructive: 351 87% 60%;
+    --destructive-foreground: 220 14% 98%;
+    --border: 220 14% 85%;
+    --input: 220 14% 85%;
+    --ring: 218 89% 72%;
+    --radius: 0.5rem;
+  }
+
+  /* Tokyo Night */
+  .dark {
+    --background: 235 19% 12%;
+    --foreground: 226 31% 75%;
+    --card: 228 24% 19%;
+    --card-foreground: 226 31% 75%;
+    --popover: 228 24% 19%;
+    --popover-foreground: 226 31% 75%;
+    --primary: 218 89% 72%;
+    --primary-foreground: 235 19% 12%;
+    --secondary: 228 24% 23%;
+    --secondary-foreground: 226 31% 75%;
+    --muted: 226 22% 25%;
+    --muted-foreground: 226 22% 55%;
+    --accent: 267 84% 79%;
+    --accent-foreground: 235 19% 12%;
+    --destructive: 351 87% 70%;
+    --destructive-foreground: 226 31% 95%;
+    --border: 226 22% 28%;
+    --input: 226 22% 28%;
+    --ring: 218 89% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

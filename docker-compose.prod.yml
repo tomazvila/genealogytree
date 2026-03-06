@@ -1,0 +1,19 @@
+# Production override - expose only nginx on port 8888
+# Use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile production up -d --build
+
+services:
+  postgres:
+    ports: !override []
+
+  rabbitmq:
+    ports: !override []
+
+  backend:
+    ports: !override []
+
+  frontend:
+    ports: !override []
+
+  nginx:
+    ports: !override
+      - "8888:80"
